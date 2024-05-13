@@ -1,0 +1,892 @@
+{
+	"info": {
+		"_postman_id": "0eb12a7c-63d6-4114-a98e-ecfd1858a396",
+		"name": "simple-grocery-store-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "generateToken",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a68d9cab-317e-4727-ad60-d53b48dcf687",
+						"exec": [
+							"pm.test(\"Take a token\",()=>{",
+							"    const response=pm.response.json()",
+							"    pm.collectionVariables.set('accessToken', response.accessToken)",
+							"})",
+							"",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201)",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "188f1d0d-6621-40f6-8115-7322653330b3",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"clientName\":\"shahla\",\n    \"clientEmail\":\"{{$randomEmail}}\"\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{baseUrl}}/api-clients"
+			},
+			"response": []
+		},
+		{
+			"name": "getStatus",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cc8d7e27-319c-4b79-aec2-9dc9b1041c68",
+						"exec": [
+							"pm.test('Status code is 200', ()=>{",
+							"    pm.response.to.have.status(200)",
+							"})",
+							"",
+							"pm.test('Response is valid', function() {",
+							"        const schema = {",
+							"    \"status\": {",
+							"        \"type\": \"object\"",
+							"    }",
+							"    }",
+							"  pm.response.to.have.jsonSchema(schema);",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "65a90539-c7da-4ce8-89da-9f64172d10a4",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{baseUrl}}/status"
+			},
+			"response": []
+		},
+		{
+			"name": "getAllProducts",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9ac2fe21-96f2-405a-a082-0c8c2619e4d4",
+						"exec": [
+							"pm.test('Status code is 200',()=>{",
+							"    pm.response.to.have.status(200)",
+							"})",
+							"",
+							"pm.test(\"Set productId\",()=>{",
+							"    const response=pm.response.json()",
+							"    const availableProducts=response.filter(product=>product.inStock===true)",
+							"    const unavailableProducts=response.filter(product=>product.inStock===false)",
+							"",
+							"    if(availableProducts.length) {",
+							"    pm.collectionVariables.set('availableProductId',availableProducts[0].id)",
+							"    pm.collectionVariables.set('availableProductId2',availableProducts[1].id)",
+							"    }",
+							"",
+							"    if(unavailableProducts.length) {",
+							"        pm.collectionVariables.set('unavailableProductId', unavailableProducts[0].id)",
+							"    }",
+							"})",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "bf0b111a-cf8c-4ec9-a00e-c11e76cfda5a",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "category",
+							"value": "coffee",
+							"disabled": true
+						},
+						{
+							"key": "results",
+							"value": "1",
+							"disabled": true
+						},
+						{
+							"key": "available",
+							"value": "false",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getProductById",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6fb21e94-3709-40e8-a8fc-1d1197be0b55",
+						"exec": [
+							"const response=pm.response.json()",
+							"",
+							"pm.test(\"Status code is 200\",()=>{",
+							"    pm.response.to.have.status(200)",
+							"})",
+							"",
+							"pm.test('Product is found',()=>{",
+							"    pm.expect(response).to.be.an('object')",
+							"})",
+							"",
+							"pm.test('Correct product is selected',()=>{",
+							"   pm.expect(response.id).to.eql(\"{{availableProductId}}\")",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d75e9bc0-7778-4829-925a-aded033a1de3",
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "d98f1db2-bf8b-4dbd-85a9-d7776c0b6f11",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products/:productId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						":productId"
+					],
+					"variable": [
+						{
+							"key": "productId",
+							"value": "{{availableProductId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createCart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "51f1daff-a8ca-4369-94fb-7798136176c3",
+						"exec": [
+							"const response=pm.response.json()",
+							"",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201)",
+							"});",
+							"",
+							"pm.test('Created is true', ()=>{",
+							"  pm.expect(response.created).to.eql(true)",
+							"})",
+							"",
+							"pm.test('Set cartID',()=>{",
+							"    pm.collectionVariables.set('cartId', response.cartId)",
+							"})",
+							"",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "954ac261-62ca-49c4-88b8-1d37b4acfede",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": "{{baseUrl}}/carts"
+			},
+			"response": []
+		},
+		{
+			"name": "getCartsByID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "dd84f958-c914-4259-9c4c-a8d70cdeab69",
+						"exec": [
+							"pm.test('Status is 200',()=>{",
+							"    pm.response.to.have.status(200)",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "a26b3efa-d72c-4047-9563-d29809994ef4",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/carts/:cartId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"carts",
+						":cartId"
+					],
+					"variable": [
+						{
+							"key": "cartId",
+							"value": "{{cartId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "addItemsToCart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "51f1daff-a8ca-4369-94fb-7798136176c3",
+						"exec": [
+							"const response=pm.response.json()",
+							"",
+							"pm.test(\"Status is 201\", function () {",
+							"    pm.response.to.have.status(201)",
+							"});",
+							"",
+							"pm.test('Created is true', ()=>{",
+							"  pm.expect(response.created).to.eql(true)",
+							"})",
+							"",
+							"pm.test(\"Set ItemId\",()=>{",
+							"    pm.collectionVariables.set('itemId', response.itemId)",
+							"})",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "67740a67-14ee-4dd3-a48d-f46e1c7e5e4d",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{accessToken}}"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"productId\": \"{{availableProductId}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/carts/:cartId/items",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"carts",
+						":cartId",
+						"items"
+					],
+					"variable": [
+						{
+							"key": "cartId",
+							"value": "{{cartId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getItemsByCartID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "51f1daff-a8ca-4369-94fb-7798136176c3",
+						"exec": [
+							"pm.test(\"Status is 200\", function () {",
+							"   pm.response.to.have.status(200)",
+							"});",
+							"",
+							"pm.test('Check the correct ItemId is selected',()=>{",
+							"    const response=pm.response.json()",
+							"    pm.expect(response.id).to.eql('{{itemId}}')",
+							"})",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "1ba2b68c-fc96-4325-aed3-aa9c685ae48a",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"productId\": \"{{availableProductId}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/carts/:cartId/items",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"carts",
+						":cartId",
+						"items"
+					],
+					"variable": [
+						{
+							"key": "cartId",
+							"value": "{{cartId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateItemInCart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "51f1daff-a8ca-4369-94fb-7798136176c3",
+						"exec": [
+							"pm.test('Status code is 204',()=>{",
+							"    pm.response.to.have.status(204)",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "1714d127-407e-455d-9449-42f9beebeab1",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"quantity\": 3\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/carts/:cartId/items/:itemId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"carts",
+						":cartId",
+						"items",
+						":itemId"
+					],
+					"variable": [
+						{
+							"key": "cartId",
+							"value": "{{cartId}}"
+						},
+						{
+							"key": "itemId",
+							"value": "{{itemId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "replaceItem",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "51f1daff-a8ca-4369-94fb-7798136176c3",
+						"exec": [
+							"pm.test('Status code is 204',()=>{",
+							"    pm.response.to.have.status(204)",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "a8da129d-efea-42b2-863b-3214f3c29a81",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\":\"{{availableProductId2}}\",\n    \"quantity\": 4\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/carts/:cartId/items/:itemId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"carts",
+						":cartId",
+						"items",
+						":itemId"
+					],
+					"variable": [
+						{
+							"id": "956bec5c-8895-4af3-869e-a1acc25ae611",
+							"key": "cartId",
+							"value": "{{cartId}}"
+						},
+						{
+							"id": "7b038c20-d9b6-4c4b-8a8a-1313878c97ae",
+							"key": "itemId",
+							"value": "{{itemId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deleteItem",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "daec3518-99b1-4ea3-9a05-484fb1ae6d8d",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});",
+							"",
+							"pm.test('Delete ItemID',()=>{",
+							"    pm.collectionVariables.set('itemId','') ",
+							"})",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "0d4704e0-7851-4eca-84d7-6dbcbf617933",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/carts/:cartId/items/:itemId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"carts",
+						":cartId",
+						"items",
+						":itemId"
+					],
+					"variable": [
+						{
+							"key": "cartId",
+							"value": "{{cartId}}"
+						},
+						{
+							"key": "itemId",
+							"value": "{{itemId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createOrder",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "66aefedb-e08e-45cf-b2ac-b91424e43b38",
+						"exec": [
+							"const response=pm.response.json()",
+							"",
+							"pm.test(\"Status is 201\", function () {",
+							"    pm.response.to.have.status(201)",
+							"});",
+							"",
+							"pm.test('Created is true', ()=>{",
+							"  pm.expect(response.created).to.eql(true)",
+							"})",
+							"",
+							"pm.test(\"orderId is string\", ()=>{",
+							"    pm.expect(response.orderId).to.be.an('string')",
+							"})",
+							"",
+							"pm.test(\"Set OrderID\",()=>{",
+							"    pm.collectionVariables.set('orderId', response.orderId)",
+							"})",
+							"",
+							"pm.test('Clear cartId and itemId',()=>{",
+							"    pm.collectionVariables.set('cartId', '')",
+							"    pm.collectionVariables.set('itemId', '')",
+							"})",
+							"",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "a09910c2-f082-4e70-a46d-fc9ac53d32f5",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{accessToken}}"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"cartId\": \"{{cartId}}\",\n    \"customerName\": \"John\",\n    \"comment\":\"it is a comment\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{baseUrl}}/orders"
+			},
+			"response": []
+		},
+		{
+			"name": "getOrders",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3cde5059-5b15-4f67-b689-b8bdd719add4",
+						"exec": [
+							"pm.test(\"Status code is 200\",()=>{",
+							"    pm.response.to.have.status(200)",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "060832d5-2eb7-4e66-be46-ba0c583a3683",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{accessToken}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "{{baseUrl}}/orders"
+			},
+			"response": []
+		},
+		{
+			"name": "updateOrder",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "41c8404a-1c7d-4aee-a07f-3e32bb1a4ffa",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "99ea9946-4fe7-4a0a-9830-c64cd8e23755",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{accessToken}}"
+					}
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customerName\": \"Updated John\",\n    \"comment\":\"Updated it is a comment\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/orders/:orderId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders",
+						":orderId"
+					],
+					"variable": [
+						{
+							"key": "orderId",
+							"value": "{{orderId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deleteOrder",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3f5545cd-538a-4971-be8d-eff79bde7ebb",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});",
+							"",
+							"pm.test('Clear OrderID',()=>{",
+							"    pm.collectionVariables.set(\"orderId\", '');",
+							"})",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "a6cacb18-4d67-44a3-9da1-07e43bbcb006",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{accessToken}}"
+					}
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/orders/:orderId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders",
+						":orderId"
+					],
+					"variable": [
+						{
+							"key": "orderId",
+							"value": "{{orderId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "eefaf6ee-9bf5-4359-b5a3-eeabcf886335",
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "e453f0d2-2f73-43e2-b377-8362012255d7",
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://simple-grocery-store-api.glitch.me",
+			"type": "string"
+		},
+		{
+			"key": "availableProductId",
+			"value": ""
+		},
+		{
+			"key": "unavailableProductId",
+			"value": ""
+		},
+		{
+			"key": "cartId",
+			"value": ""
+		},
+		{
+			"key": "itemId",
+			"value": ""
+		},
+		{
+			"key": "availableProductId2",
+			"value": ""
+		},
+		{
+			"key": "accessToken",
+			"value": ""
+		},
+		{
+			"key": "orderId",
+			"value": ""
+		}
+	]
+}
